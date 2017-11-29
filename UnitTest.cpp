@@ -33,13 +33,14 @@ int main() {
     logging_init();
     string rulefile = "../metadata/rule10";
     rule_list rList(rulefile);
-    rList.print("../metadata/test1");
+    //rList.print("../metadata/test1");
 
     // generate bucket tree
-    // bucket_tree bTree(rList, 20, false, 800);
-    // bTree.tree_depth = 0;
-    // bTree.cal_tree_depth(bTree.root);
-    // cout << bTree.tree_depth << endl;
+    bucket_tree bTree(rList, 4);
+    bTree.tree_depth = 0;
+    bTree.cal_tree_depth(bTree.root);
+    cout << bTree.tree_depth << endl;
+    bTree.print_tree("../metadata/tree.dat");
 
     // bTree.tree_depth = 0;
     // bTree.cal_tree_depth(bTree.root);

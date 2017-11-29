@@ -94,7 +94,7 @@ void bucket_tree::splitNode_fix(bucket * ptr) {
         return;
     } else {
         ptr->split(opt_cut, rList);
-        for (size_t i = 0; i < 4; ++i)
+        for (size_t i = 0; i < 2; ++i)
             ptr->cutArr[i] = opt_cut[i];
 
         for (auto iter = ptr->sonList.begin(); iter != ptr->sonList.end(); ++iter)
