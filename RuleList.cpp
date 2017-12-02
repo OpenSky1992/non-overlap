@@ -26,7 +26,6 @@ rule_list::rule_list(string & filename) {
                 ++iter_cp;
         }
     }
-    occupancy = vector<size_t>(list.size(), 0);
     file.close();
 }
 

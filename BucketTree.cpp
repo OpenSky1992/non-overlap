@@ -36,7 +36,7 @@ bucket_tree::~bucket_tree() {
 pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup& packet, bucket * buck) const {
     if (!buck->sonList.empty()) {
         size_t idx = 0;
-        for (int i = 3; i >= 0; --i) {
+        for (int i = number_prefix-1; i >= 0; --i) {
             if (buck->cutArr[i] != 0) {
                 idx = (idx << buck->cutArr[i]);
                 size_t offset = (packet.addrs[i] - buck->addrs[i].pref);
@@ -47,9 +47,7 @@ pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup& packet, bucket *
         assert (idx < buck->sonList.size());
         return search_bucket(packet, buck->sonList[idx]);
     } else {
-        buck->hit = true;
         int rule_id = -1;
-
         for (auto iter = buck->related_rules.begin(); iter != buck->related_rules.end(); ++iter) {
             if (rList->list[*iter].packet_hit(packet)) {
                 rule_id = *iter;
@@ -61,7 +59,7 @@ pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup& packet, bucket *
 }
 
 void bucket_tree::gen_candi_split(size_t cut_no) {
-    vector<size_t> base(2,0);
+    vector<size_t> base(number_prefix,0);
     for (size_t i = 0; i <= cut_no; ++i) {
         base[0] = i;
         base[1] = cut_no - i;
@@ -94,7 +92,7 @@ void bucket_tree::splitNode_fix(bucket * ptr) {
         return;
     } else {
         ptr->split(opt_cut, rList);
-        for (size_t i = 0; i < 2; ++i)
+        for (size_t i = 0; i < number_prefix; ++i)
             ptr->cutArr[i] = opt_cut[i];
 
         for (auto iter = ptr->sonList.begin(); iter != ptr->sonList.end(); ++iter)

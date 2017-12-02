@@ -127,6 +127,7 @@ public:
     inline pref_addr(const std::string &);
 
     inline bool operator==(const pref_addr &) const;
+    inline void mutate(uint32_t s_shrink, uint32_t s_expand);
 
     inline bool match (const pref_addr &) const;
     inline bool hit (const uint32_t &) const;
@@ -345,6 +346,32 @@ inline string pref_addr::get_str() const {
     }
     ss<<m;
     return ss.str();
+}
+
+inline void pref_addr::mutate(uint32_t s_shrink, uint32_t s_expand) {
+    if (rand()%2 > 0) { // expand
+        if (s_expand == 0)
+            s_expand = 1;
+        uint32_t mdig = rand() % (s_expand+1);
+        for (uint32_t i = 0; i < mdig; ++i) {
+            if (mask == 0)
+                break;
+            mask = mask << 1;
+        }
+        pref = pref & mask;
+    } else { // shrink
+        if (s_shrink == 0)
+            s_shrink = 1;
+        uint32_t mdig = rand() % (s_shrink+1);
+        for (uint32_t i = 0; i < mdig; ++i) {
+            if (~mask == 0)
+                break;
+            uint32_t new_mask = (mask >> 1) + (1 << 31);
+            pref += (rand()%2 * (new_mask - mask));
+            mask = new_mask;
+        }
+        pref = pref & mask;
+    }
 }
 
 #endif
