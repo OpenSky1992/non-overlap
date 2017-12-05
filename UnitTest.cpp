@@ -2,6 +2,8 @@
 #include "BucketTree.h"
 #include "TraceGen.h"
 #include "parsePcap.h"
+#include "Separate.h"
+
 
 using std::cout;
 using std::endl;
@@ -29,16 +31,17 @@ void logging_init() {
 int main() {
     srand (time(NULL));
     logging_init();
-    string rulefile = "../metadata/rule4000";
+    string metaDir="../metadata/";
+    string rulefile = metaDir+"rule4000";
     rule_list rList(rulefile);
     
-
     // generate bucket tree
     bucket_tree bTree(rList, 8);
     bTree.tree_depth = 0;
     bTree.cal_tree_depth(bTree.root);
-    cout << bTree.tree_depth << endl;
-    bTree.print_tree("../metadata/tree_pr.dat");
+    cout <<"bucket Tree depth:"<< bTree.tree_depth << endl;
+    bTree.print_tree(metaDir+"tree_pr.dat");
+
 
     //trace generation
     // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
@@ -54,6 +57,10 @@ int main() {
     //test parsing pcap file
     // parsePcap parser("/home/part2/cab/data","/home/part2/cab/parsedTrace2");
     // parser.parse_pcap_file_mp(0,19);
+
+    //test separate rule
+    separate sep(rList);
+    sep.printRule(metaDir+"non-overlap");
     
 
     return 0;

@@ -17,13 +17,13 @@ public:
     inline p_rule(const p_rule &);
     inline p_rule(const std::string &);
 
-    inline bool packet_hit(const addr_5tup &packet);
-    inline addr_5tup get_random();
-    inline std::string get_str();
-    inline void print();
+    inline bool packet_hit(const addr_5tup &packet) const;
+    inline addr_5tup get_random() const;
+    inline std::string get_str() const;
+    inline void print() const;
 
-    inline bool match_rule(const p_rule &);
-    inline bool operator==(const p_rule &);
+    inline bool match_rule(const p_rule &) const;
+    inline bool operator==(const p_rule &) const;
 };
 
 class h_rule:public p_rule
@@ -57,7 +57,7 @@ inline p_rule::p_rule(const std::string &rule_str)
     }
 }
 
-inline bool p_rule::packet_hit(const addr_5tup &packet)
+inline bool p_rule::packet_hit(const addr_5tup &packet) const
 {
     for (uint32_t i = 0; i < number_prefix; i++) {
         if (!addrs[i].hit(packet.addrs[i]))
@@ -66,7 +66,7 @@ inline bool p_rule::packet_hit(const addr_5tup &packet)
     return true;
 }
 
-inline addr_5tup p_rule::get_random()
+inline addr_5tup p_rule::get_random() const
 {
     addr_5tup header;
     for (uint32_t i = 0; i < number_prefix; i++){
@@ -78,7 +78,7 @@ inline addr_5tup p_rule::get_random()
     return header;
 }
 
-inline std::string p_rule::get_str() 
+inline std::string p_rule::get_str() const
 {
     stringstream ss;
     for(uint32_t i = 0; i < number_prefix; i++) {
@@ -87,12 +87,12 @@ inline std::string p_rule::get_str()
     return ss.str();
 }
 
-inline void p_rule::print() 
+inline void p_rule::print() const
 {
     cout<<get_str()<<endl;
 }
 
-inline bool p_rule::match_rule(const p_rule &br) 
+inline bool p_rule::match_rule(const p_rule &br) const
 {
     for (uint32_t i = 0; i < number_prefix; ++i) {
         if (!addrs[i].match(br.addrs[i]))
@@ -101,7 +101,7 @@ inline bool p_rule::match_rule(const p_rule &br)
     return true;
 }
 
-inline bool p_rule::operator==(const p_rule &rhs)
+inline bool p_rule::operator==(const p_rule &rhs) const
 {
     for(uint32_t i=0; i<number_prefix; i++) {
         if(!(addrs[i]==rhs.addrs[i]))

@@ -30,6 +30,7 @@
 #include <boost/log/sources/record_ostream.hpp>
 
 const unsigned int number_prefix=2;    //the number of prefix   
+const unsigned int ipv4_standard_length=32;
 
 #endif
 

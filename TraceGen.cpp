@@ -14,10 +14,8 @@ using std::thread;
 using std::atomic_uint;
 using std::atomic_bool;
 using std::mutex;
-using boost::unordered_map;
-using boost::unordered_set;
-namespace fs = boost::filesystem;
-namespace io = boost::iostreams;
+
+
 
 typedef boost::unordered_map<addr_5tup, uint32_t>::iterator Map_iter;
 typedef vector<fs::path> Path_Vec_T;
