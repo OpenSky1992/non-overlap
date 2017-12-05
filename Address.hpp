@@ -128,6 +128,7 @@ public:
 
     inline bool operator==(const pref_addr &) const;
     inline void mutate(uint32_t s_shrink, uint32_t s_expand);
+    inline bool truncate(pref_addr &) const;
 
     inline bool match (const pref_addr &) const;
     inline bool hit (const uint32_t &) const;
@@ -348,7 +349,8 @@ inline string pref_addr::get_str() const {
     return ss.str();
 }
 
-inline void pref_addr::mutate(uint32_t s_shrink, uint32_t s_expand) {
+inline void pref_addr::mutate(uint32_t s_shrink, uint32_t s_expand) 
+{
     if (rand()%2 > 0) { // expand
         if (s_expand == 0)
             s_expand = 1;
@@ -371,6 +373,23 @@ inline void pref_addr::mutate(uint32_t s_shrink, uint32_t s_expand) {
             mask = new_mask;
         }
         pref = pref & mask;
+    }
+}
+
+inline bool pref_addr::truncate(pref_addr &rule) const
+{
+    if (rule.mask < mask) { // trunc
+        if (rule.pref == (pref & rule.mask)) {
+            rule.mask = mask;
+            rule.pref = pref;
+            return true;
+        } else
+            return false;
+    } else {
+        if ((rule.pref & mask) == pref)
+            return true;
+        else
+            return false;
     }
 }
 

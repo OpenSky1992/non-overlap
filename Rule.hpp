@@ -32,11 +32,12 @@ public:
     inline h_rule(const h_rule &);
     inline h_rule(const std::string &);
     inline h_rule(const std::string &, const std::vector<p_rule> &);
-    inline uint32_t gen_rule_id();
+    inline addr_5tup gen_header();
+    inline bool match_truncate(p_rule &);
     inline void mutate_pred(uint32_t, uint32_t);
 private:
     inline uint32_t cal_rela(const std::vector<p_rule> &);
-    std::vector<uint32_t> rela_rule;
+    std::vector<p_rule> rela_rule;
 };
 
 inline p_rule::p_rule(const p_rule &br)
@@ -116,7 +117,12 @@ inline h_rule::h_rule(const h_rule & hr):p_rule(hr) {
     rela_rule = hr.rela_rule;
 }
 
-inline h_rule::h_rule(const string & str, const vector<p_rule> & rL):p_rule(str) {
+inline h_rule::h_rule(const string & str, const vector<p_rule> & rL) {
+    vector<string> temp;
+    boost::split(temp,str,boost::is_any_of("\t"));
+    for(uint32_t i=0;i<number_prefix;i++){
+        addrs[i]=pref_addr(temp[i]);
+    }
     cal_rela(rL);
 }
 
@@ -126,19 +132,28 @@ inline void h_rule::mutate_pred(uint32_t shrink_scale, uint32_t expand_scale) {
     }
 }
 
+inline bool h_rule::match_truncate(p_rule &rule){
+    for (uint32_t i = 0; i < number_prefix; ++i){
+        if(!addrs[i].truncate(rule.addrs[i]))
+            return false;
+    }
+    return true;
+}
+
 inline uint32_t h_rule::cal_rela(const vector<p_rule> & rList) {
     for (uint32_t i = 0; i < rList.size(); i++) {
-        if(match_rule(rList[i])) {
-            rela_rule.push_back(i);
+        p_rule rule=rList[i];
+        if(match_truncate(rule)) {
+            rela_rule.push_back(rule);
         }
     }
     return rela_rule.size();
 }
 
-inline uint32_t h_rule::gen_rule_id() {
+inline addr_5tup h_rule::gen_header() {
     auto iter = rela_rule.begin();
     advance(iter, rand()%rela_rule.size());
-    return *iter;
+    return iter->get_random();
 }
 
 #endif

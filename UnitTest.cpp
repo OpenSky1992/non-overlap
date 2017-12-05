@@ -44,9 +44,9 @@ int main() {
 
 
     //trace generation
-    // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
-    // tGen.hotspot_prepare();
-    // tGen.pFlow_pruning_gen(false);
+    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
+    tGen.hotspot_prepare();
+    tGen.pFlow_pruning_gen(false);
 
     //test bucket search
     // string str = "0.00%2952790016%2258155530%4000%8000%6";
@@ -59,8 +59,8 @@ int main() {
     // parser.parse_pcap_file_mp(0,19);
 
     //test separate rule
-    separate sep(rList);
-    sep.printRule(metaDir+"non-overlap");
+    // separate sep(rList);
+    // sep.printRule(metaDir+"non-overlap");
     
 
     return 0;

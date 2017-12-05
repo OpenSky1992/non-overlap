@@ -481,7 +481,7 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
                     /* hot packets */
                     auto q_iter = hotspot_queue.begin();
                     advance(q_iter, rand() % para.hotspot_no);
-                    header = rList->list[q_iter->gen_rule_id()].get_random();
+                    header = q_iter->gen_header();
                 } else {
                     /* cold packets */
                     header = rList->list[(rand()%(rList->list.size()))].get_random();
@@ -610,7 +610,7 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
                 if ((double) rand() /RAND_MAX < (1-para.cold_prob)) { // no noise
                     auto q_iter = hotspot_queue.begin();
                     advance(q_iter, rand()%para.hotspot_no);
-                    header = rList->list[q_iter->gen_rule_id()].get_random();
+                    header = q_iter->gen_header();
                 } else {
                     header = rList->list[(rand()%(rList->list.size()))].get_random();
                 }
