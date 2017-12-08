@@ -33,7 +33,7 @@ int main() {
     srand (time(NULL));
     logging_init();
     string metaDir="../metadata/";
-    string rulefile = metaDir+"rule2850";
+    string rulefile = metaDir+"rule4000";
     rule_list rList(rulefile);
     
     // generate bucket tree
@@ -45,9 +45,9 @@ int main() {
 
 
     //trace generation
-    // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
-    // tGen.hotspot_prepare();
-    // tGen.pFlow_pruning_gen(false);
+    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
+    tGen.hotspot_prepare();
+    tGen.pFlow_pruning_gen(false);
 
     //test bucket search
     // string str = "0.00%2952790016%2258155530%4000%8000%6";
@@ -64,8 +64,8 @@ int main() {
     // sep.printRule(metaDir+"non-overlap");
     
     //test correct 
-    
-    ifstream infile("ref_trace");
+    /*
+    ifstream infile("ref_trace100k");
     string line;
     int testCount=0;
     while(getline(infile,line)){
@@ -88,7 +88,7 @@ int main() {
         //cout<<"search is correct:"<<packet.str_easy_RW()<<" "<<listSearch<<endl;
     }
     infile.close();
-    
+    */
 
     return 0;
 }

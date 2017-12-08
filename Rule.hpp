@@ -33,6 +33,7 @@ public:
     //inline h_rule(const std::string &);
     inline h_rule(const std::string &, const std::vector<p_rule> &);
     inline addr_5tup gen_header();
+    inline bool match_truncate(p_rule &);
     inline void mutate_pred(uint32_t, uint32_t);
 private:
     inline uint32_t cal_rela(const std::vector<p_rule> &);
@@ -131,10 +132,19 @@ inline void h_rule::mutate_pred(uint32_t shrink_scale, uint32_t expand_scale) {
     }
 }
 
+inline bool h_rule::match_truncate(p_rule &rule){
+    for (uint32_t i = 0; i < number_prefix; ++i){
+        if(!addrs[i].truncate(rule.addrs[i]))
+            return false;
+    }
+    return true;
+}
+
+
 inline uint32_t h_rule::cal_rela(const vector<p_rule> & rList) {
     for (uint32_t i = 0; i < rList.size(); i++) {
         p_rule rule=rList[i];
-        if(match_rule(rule)) {
+        if(match_truncate(rule)) {
             rela_rule.push_back(rule);
         }
     }
