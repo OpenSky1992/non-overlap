@@ -269,7 +269,7 @@ inline pref_addr::pref_addr(const string & prefstr) {
     uint32_t maskInt = boost::lexical_cast<uint32_t>(temp1[1]);
     mask = 0;
     if (maskInt != 0)
-        mask = ((~uint32_t(0)) << (32-maskInt));
+        mask = ((~uint32_t(0)) << (ipv4_standard_length-maskInt));
 
     vector<string> temp2;
     boost::split(temp2, temp1[0], boost::is_any_of("."));
@@ -338,7 +338,7 @@ inline string pref_addr::get_str() const {
     uint32_t mask_cp = mask;
 
     if ((~mask_cp) == 0) {
-        ss<<32;
+        ss<<ipv4_standard_length;
         return ss.str();
     }
     for (uint32_t i=0; mask_cp; i++) {

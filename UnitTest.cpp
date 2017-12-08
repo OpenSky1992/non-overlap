@@ -8,6 +8,7 @@
 using std::cout;
 using std::endl;
 using std::ofstream;
+using std::ifstream;
 
 namespace logging = boost::log;
 namespace src = boost::log::sources;
@@ -32,7 +33,7 @@ int main() {
     srand (time(NULL));
     logging_init();
     string metaDir="../metadata/";
-    string rulefile = metaDir+"rule4000";
+    string rulefile = metaDir+"rule2850";
     rule_list rList(rulefile);
     
     // generate bucket tree
@@ -44,9 +45,9 @@ int main() {
 
 
     //trace generation
-    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
-    tGen.hotspot_prepare();
-    tGen.pFlow_pruning_gen(false);
+    // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
+    // tGen.hotspot_prepare();
+    // tGen.pFlow_pruning_gen(false);
 
     //test bucket search
     // string str = "0.00%2952790016%2258155530%4000%8000%6";
@@ -59,8 +60,34 @@ int main() {
     // parser.parse_pcap_file_mp(0,19);
 
     //test separate rule
-    // separate sep(rList);
+    separate sep(rList);
     // sep.printRule(metaDir+"non-overlap");
+    
+    //test correct 
+    
+    ifstream infile("ref_trace");
+    string line;
+    int testCount=0;
+    while(getline(infile,line)){
+        int listSearch,bucketSearch,indepSearch;
+        addr_5tup packet(line);
+        listSearch=rList.linear_search(packet);
+        bucketSearch=(bTree.search_bucket(packet)).second;
+        indepSearch=sep.search(packet);
+        if(bucketSearch!=listSearch){
+            cout<<"bucket search error:"<<packet.str_easy_RW()<<endl;
+            return 0;
+        }
+        if(indepSearch!=listSearch){
+            cout<<"non-overlap search error:"<<packet.str_easy_RW()<<endl;
+            return 0;
+        }
+        testCount++;
+        if(testCount%10000==0)
+            cout<<"current:"<<testCount/10000<<endl;
+        //cout<<"search is correct:"<<packet.str_easy_RW()<<" "<<listSearch<<endl;
+    }
+    infile.close();
     
 
     return 0;

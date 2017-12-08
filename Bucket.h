@@ -21,7 +21,7 @@ class bucket: public p_rule {
   public:
     bucket();
     bucket(const bucket &);
-    bucket(const string &, const rule_list *);
+
     /*
     dim: indicate the dimension of cutting
     rList: rule list

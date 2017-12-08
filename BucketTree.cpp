@@ -16,7 +16,8 @@ bucket_tree::bucket_tree() {
     root = NULL;
     threshold=0;
 }
-//jiaren20161117: test_bed -> bIs2tup
+
+//constructor
 bucket_tree::bucket_tree(rule_list & rL, uint32_t thr) {
     threshold=thr;
     rList = &rL;
@@ -33,7 +34,12 @@ bucket_tree::~bucket_tree() {
     delNode(root);
 }
 
-pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup& packet, bucket * buck) const {
+std::pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup &packet) const
+{
+    return search_bucket_R(packet,root);
+}
+
+pair<bucket *, int> bucket_tree::search_bucket_R(const addr_5tup &packet, bucket * buck) const {
     if (!buck->sonList.empty()) {
         size_t idx = 0;
         for (int i = number_prefix-1; i >= 0; --i) {
@@ -45,7 +51,7 @@ pair<bucket *, int> bucket_tree::search_bucket(const addr_5tup& packet, bucket *
             }
         }
         assert (idx < buck->sonList.size());
-        return search_bucket(packet, buck->sonList[idx]);
+        return search_bucket_R(packet, buck->sonList[idx]);
     } else {
         int rule_id = -1;
         for (auto iter = buck->related_rules.begin(); iter != buck->related_rules.end(); ++iter) {

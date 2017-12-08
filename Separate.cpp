@@ -7,9 +7,17 @@ using std::ofstream;
 
 separate::separate(rule_list &rList)
 {
+	int uselessRule_count=0;
+	uint32_t originIndex=0;
 	mappingPrepare();
 	for(p_rule original_rule:rList.list)
-		AddNewRule(original_rule);
+	{
+		if(AddNewRule(original_rule,originIndex)==0)
+			uselessRule_count++;
+		originIndex++;
+	}
+	cout<<"the number of useless rule:"<<uselessRule_count<<endl;
+	cout<<"the number of independent rule:"<<independentRuleSet.size()<<endl;
 }
 
 void separate::printRule(string filename)
@@ -44,10 +52,11 @@ vector<int> separate::getOverlapFromSubset(const p_rule &rule1,const vector<int>
 }
 
 //the main function
-void separate::separateRule(const p_rule rule1,vector<int> &overlap)
+void separate::separateRule(const p_rule rule1,const uint32_t originIndex,vector<int> &overlap)
 {
 	if(overlap.empty()){
 		independentRuleSet.push_back(rule1);
+		indepIndex2realIndex.push_back(originIndex);
 		return ;
 	}
 	auto it=overlap.begin();
@@ -70,19 +79,36 @@ void separate::separateRule(const p_rule rule1,vector<int> &overlap)
 			new_rule.addrs[i].mask=(new_rule.addrs[i].mask>>1)+(1<<(ipv4_standard_length-1));
 			new_rule.addrs[i].pref=new_rule.addrs[i].pref & new_rule.addrs[i].mask;
 			vector<int> subOverlap=getOverlapFromSubset(new_rule,overlap);
-			separateRule(new_rule,subOverlap);
+			separateRule(new_rule,originIndex,subOverlap);
 			new_rule.addrs[i].pref=target.addrs[i].pref & new_rule.addrs[i].mask;
 			compare_bit=compare_bit>>1;
 		}
 	}
 }
 
-void separate::AddNewRule(const p_rule &rule1)
+int separate::AddNewRule(const p_rule &rule1,const uint32_t originIndex)
 {
+	int beforeSize=independentRuleSet.size();
 	vector<int> overlap;
 	for(unsigned int i=0;i<independentRuleSet.size();i++){
 		if(rule1.match_rule(independentRuleSet[i]))
 			overlap.push_back(i);
 	}
-	separateRule(rule1,overlap);
+	separateRule(rule1,originIndex,overlap);
+	return independentRuleSet.size()-beforeSize;
+}
+
+int separate::search(const addr_5tup &packet) const
+{
+	int result=-1;
+	for(int i=0;i<int(independentRuleSet.size());i++){
+		if(independentRuleSet[i].packet_hit(packet)){
+			result=i;
+			break;
+		}
+	}
+	if(result==-1)
+		return -1;
+	else
+		return indepIndex2realIndex[result];
 }

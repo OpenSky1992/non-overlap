@@ -121,7 +121,7 @@ tgen_para::tgen_para(string config_file):tgen_para() {
                 continue;
             }
 
-            if (tmp_arr[0] == "scope" && tmp_arr.size() >= 5) {
+            if (tmp_arr[0] == "scope" && tmp_arr.size() >= (number_prefix+1)) {
                 for(unsigned int i = 0; i < number_prefix; ++i) {
                     scope[i] = boost::lexical_cast<uint32_t>(tmp_arr[i+1]);
                 }

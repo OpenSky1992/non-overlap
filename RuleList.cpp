@@ -4,6 +4,8 @@ using std::ifstream;
 using std::ofstream;
 using std::string;
 using std::tie; // jiaren:missing the namespace
+using std::cout;
+using std::endl;
 
 
 rule_list::rule_list() {}
@@ -27,6 +29,7 @@ rule_list::rule_list(string & filename) {
         }
     }
     file.close();
+    cout<<"unique rule number:"<<list.size()<<endl;
 }
 
 void rule_list::obtain_dep() { // obtain the dependency map

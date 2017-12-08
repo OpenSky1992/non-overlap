@@ -23,23 +23,17 @@ class bucket_tree {
     uint32_t threshold;
 
     int tree_depth;
-
-    // for debug
-    bool debug;
-
-    // HyperCut related
-    size_t max_cut_per_layer;
-    double slow_prog_perc;
-
     std::vector<std::vector<size_t> > candi_split;
 
   public:
     bucket_tree();
+    
     //rule_list, threshold that must be split
-    bucket_tree(rule_list &, uint32_t);
+    bucket_tree(rule_list &, uint32_t thre);
     ~bucket_tree();
+
     //return bucket and the index of rule
-    std::pair<bucket *, int> search_bucket(const addr_5tup &, bucket* ) const;
+    std::pair<bucket *, int> search_bucket(const addr_5tup &) const;
     void cal_tree_depth(bucket *, int = 0);
 
   private:
@@ -48,6 +42,7 @@ class bucket_tree {
     void splitNode_fix(bucket * = NULL);
     void delNode(bucket *);
     void print_bucket(std::ofstream &, bucket *, bool); // const
+    std::pair<bucket *, int> search_bucket_R(const addr_5tup &, bucket* ) const;
 
   public:
 
