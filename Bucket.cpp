@@ -31,14 +31,8 @@ bucket::bucket(const bucket & bk) : p_rule(bk) {
     related_rules = vector<uint32_t>();
     parent = NULL;
 }
-/*
-bucket::bucket(const string & b_str, const rule_list * rL) : p_rule(b_str) {
-    for (size_t idx = 0; idx != rL->list.size(); ++idx)
-        if (match_rule(rL->list[idx]))
-            related_rules.push_back(idx);
-    parent = NULL;
-}
-*/
+
+
 pair<double, size_t> bucket::split(const vector<size_t> & dim , rule_list *rList) {
     if (!sonList.empty())
         cleanson();

@@ -98,7 +98,7 @@ int separate::AddNewRule(const p_rule &rule1,const uint32_t originIndex)
 	return independentRuleSet.size()-beforeSize;
 }
 
-int separate::search(const addr_5tup &packet) const
+int separate::searchIndepIndex(const addr_5tup &packet) const
 {
 	int result=-1;
 	for(int i=0;i<int(independentRuleSet.size());i++){
@@ -107,6 +107,12 @@ int separate::search(const addr_5tup &packet) const
 			break;
 		}
 	}
+	return result;
+}
+
+int separate::searchOriginIndex(const addr_5tup &packet) const
+{
+	int result=searchIndepIndex(packet);
 	if(result==-1)
 		return -1;
 	else

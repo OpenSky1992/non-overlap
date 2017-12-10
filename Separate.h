@@ -13,8 +13,11 @@ public:
 	separate(rule_list &rList);
 	void printRule(string filename);
 
-	//int searchRule
-	int search(const addr_5tup &) const;
+	//return the index of origin rule set 
+	int searchOriginIndex(const addr_5tup &) const;
+
+	//return the index of independent rule set
+	int searchIndepIndex(const addr_5tup &) const;
 
 private:
 	int AddNewRule(const p_rule &rule1,const uint32_t index);

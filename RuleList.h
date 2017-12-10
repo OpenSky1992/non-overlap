@@ -5,6 +5,7 @@
 #include "Address.hpp"
 #include "Rule.hpp"
 #include <unordered_map>
+#include <set>
 
 class rule_list {
 public:
@@ -14,8 +15,6 @@ public:
     rule_list();
     rule_list(std::string & filename);
 
-    // for dependency set
-    void obtain_dep();
     int linear_search(const addr_5tup &);
 
 public:

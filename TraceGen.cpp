@@ -516,10 +516,6 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
     cout << "after smoothing, average: " << double(total_header)/para.simuT <<endl;
 
     /* process using multi-thread; */
-    fs::path temp1(gen_trace_dir+"/IDtrace");
-    fs::create_directory(temp1);
-    fs::path temp2(gen_trace_dir+"/GENtrace");
-    fs::create_directory(temp2);
 
     vector< std::future<void> > results_exp;
 
@@ -535,8 +531,7 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
     }
 
     cout<< "Merging Files... "<<endl;
-    merge_files(gen_trace_dir+"/IDtrace");
-    merge_files(gen_trace_dir+"/GENtrace");
+    merge_files(gen_trace_dir);
 
     cout<<"Generation Finished. Enjoy :)" << endl;
     return;
@@ -648,11 +643,6 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
     cout << "after smoothing, average: " << double(total_header)/para.simuT <<endl;
 
     // process using multi-thread;
-    fs::path temp1(gen_trace_dir+"/IDtrace");
-    fs::create_directory(temp1);
-    fs::path temp2(gen_trace_dir+"/GENtrace");
-    fs::create_directory(temp2);
-
 
     vector< std::future<void> > results_exp;
 
@@ -665,8 +655,7 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
     }
 
     cout<< "Merging Files... "<<endl;
-    merge_files(gen_trace_dir+"/IDtrace");
-    merge_files(gen_trace_dir+"/GENtrace");
+    merge_files(gen_trace_dir);
 
     cout<<"Generation Finished. Enjoy :)" << endl;
     return;
@@ -679,18 +668,8 @@ void tracer::f_pg_st(string ref_file, uint32_t id, boost::unordered_map<addr_5tu
     ifstream infile(ref_file);
     in.push(infile);
 
-    stringstream ss;
-    ss << gen_trace_dir<< "/IDtrace/ptrace-";
-    ss << std::setw(3) << std::setfill('0')<<id;
-    ss <<".gz";
-    io::filtering_ostream out_id;
-    out_id.push(io::gzip_compressor());
-    ofstream outfile_id (ss.str().c_str());
-    out_id.push(outfile_id);
-    out_id.precision(15);
-
     stringstream ss1;
-    ss1 << gen_trace_dir<< "/GENtrace/ptrace-";
+    ss1 << gen_trace_dir<< "/ptrace-";
     ss1 << std::setw(3) << std::setfill('0')<<id;
     ss1 <<".gz";
     io::filtering_ostream out_loc;
@@ -706,13 +685,11 @@ void tracer::f_pg_st(string ref_file, uint32_t id, boost::unordered_map<addr_5tu
         auto iter = map_ptr->find(packet);
         if (iter != map_ptr->end()) {
             packet.copy_header(iter->second.second);
-            out_id << packet.timestamp << "\t" << iter->second.first<<endl;
             out_loc << packet.str_easy_RW() << endl;
         }
     }
     cout << " Finished Processing " << ref_file << endl;
     in.pop();
-    out_id.pop();
     out_loc.pop();
 }
 

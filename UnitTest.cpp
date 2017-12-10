@@ -3,6 +3,7 @@
 #include "TraceGen.h"
 #include "parsePcap.h"
 #include "Separate.h"
+#include "OFswitch.h"
 
 
 using std::cout;
@@ -37,7 +38,7 @@ int main() {
     rule_list rList(rulefile);
     
     // generate bucket tree
-    bucket_tree bTree(rList, 8);
+    bucket_tree bTree(rList, 10);
     bTree.tree_depth = 0;
     bTree.cal_tree_depth(bTree.root);
     cout <<"bucket Tree depth:"<< bTree.tree_depth << endl;
@@ -45,9 +46,9 @@ int main() {
 
 
     //trace generation
-    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
-    tGen.hotspot_prepare();
-    tGen.pFlow_pruning_gen(false);
+    // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
+    // tGen.hotspot_prepare();
+    // tGen.pFlow_pruning_gen(false);
 
     //test bucket search
     // string str = "0.00%2952790016%2258155530%4000%8000%6";
@@ -73,7 +74,7 @@ int main() {
         addr_5tup packet(line);
         listSearch=rList.linear_search(packet);
         bucketSearch=(bTree.search_bucket(packet)).second;
-        indepSearch=sep.search(packet);
+        indepSearch=sep.searchOriginIndex(packet);
         if(bucketSearch!=listSearch){
             cout<<"bucket search error:"<<packet.str_easy_RW()<<endl;
             return 0;
@@ -90,10 +91,16 @@ int main() {
     infile.close();
     */
 
+    // simulation test
+    OFswitch ofswitch(400,400,"Trace_Generate_5/trace-1000k-0.05-20/ref_trace.gz");
+    ofswitch.set_para(&rList,&bTree,&sep);
+
+    ofswitch.mode=0;
+    ofswitch.run_test();
+    // ofswitch.mode=1;
+    // ofswitch.run_test();
+    // ofswitch.mode=2;
+    // ofswitch.run_test();
+
     return 0;
 }
-
-
-
-
-

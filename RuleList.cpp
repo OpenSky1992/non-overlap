@@ -32,17 +32,6 @@ rule_list::rule_list(string & filename) {
     cout<<"unique rule number:"<<list.size()<<endl;
 }
 
-void rule_list::obtain_dep() { // obtain the dependency map
-    for(uint32_t idx = 0; idx < list.size(); ++idx) {
-        vector <uint32_t> dep_rules;
-        for (uint32_t idx1 = 0; idx1 < idx; ++idx1) {
-            if (list[idx].match_rule(list[idx1])) {
-                dep_rules.push_back(idx1);
-            }
-        }
-        dep_map[idx] = dep_rules;
-    }
-}
 
 int rule_list::linear_search(const addr_5tup & packet) {
     for (size_t i = 0; i < list.size(); ++i) {
