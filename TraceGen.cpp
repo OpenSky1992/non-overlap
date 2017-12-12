@@ -101,7 +101,7 @@ tgen_para::tgen_para(string config_file):tgen_para() {
                 continue;
             }
 
-            if (tmp_arr[0] == "flow_arrival_rate") {
+            if (tmp_arr[0] == "flow_rate") {
                 flow_rate = boost::lexical_cast<double>(tmp_arr[1]);
                 continue;
             }
@@ -111,12 +111,12 @@ tgen_para::tgen_para(string config_file):tgen_para() {
                 continue;
             }
 
-            if (tmp_arr[0] == "cold_probability") {
+            if (tmp_arr[0] == "cold_prob") {
                 cold_prob = boost::lexical_cast<double>(tmp_arr[1]);
                 continue;
             }
 
-            if (tmp_arr[0] == "hotspot_number") {
+            if (tmp_arr[0] == "hotspot_no") {
                 hotspot_no = boost::lexical_cast<uint32_t>(tmp_arr[1]);
                 continue;
             }
@@ -454,7 +454,7 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
     }
 
     /* every ten second tube pruning eccessive flows */
-    boost::unordered_map<addr_5tup, pair<uint32_t, addr_5tup> > pruned_map;
+    boost::unordered_map<addr_5tup, addr_5tup > pruned_map;
 
     /* pruned_map   old_header-> (header_id, new_header) */
 
@@ -464,7 +464,6 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
 
     vector< addr_5tup > header_buf;
     header_buf.reserve(3000);
-    uint32_t id = 0;
     uint32_t total_header = 0;
 
     double nextKickOut = para.hotvtime;
@@ -486,10 +485,7 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
                     /* cold packets */
                     header = rList->list[(rand()%(rList->list.size()))].get_random();
                 }
-
-                pruned_map.insert(std::make_pair(header_buf[i], std::make_pair(id, header)));
-
-                ++id;
+                pruned_map.insert(std::make_pair(header_buf[i], header));
             }
 
             total_header += i;
@@ -585,13 +581,12 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
     }
 
     // smoothing every 10 sec, map the headers
-    boost::unordered_map<addr_5tup, pair<uint32_t, addr_5tup> > pruned_map;
+    boost::unordered_map<addr_5tup, addr_5tup > pruned_map;
     const double smoothing_interval = 10.0;
     double next_checkpoint = smoothing_interval;
     double flow_thres = 10 * para.flow_rate;
     vector< addr_5tup > header_buf;
     header_buf.reserve(3000);
-    uint32_t id = 0;
     uint32_t total_header = 0;
     double nextKickOut = para.hotvtime;
     double nextEvolving = para.evolving_time;
@@ -609,8 +604,7 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
                 } else {
                     header = rList->list[(rand()%(rList->list.size()))].get_random();
                 }
-                pruned_map.insert( std::make_pair(header_buf[i], std::make_pair(id, header)));
-                ++id;
+                pruned_map.insert( std::make_pair(header_buf[i],header));
             }
             total_header += i;
             header_buf.clear();
@@ -661,7 +655,7 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
     return;
 }
 
-void tracer::f_pg_st(string ref_file, uint32_t id, boost::unordered_map<addr_5tup, pair<uint32_t, addr_5tup> > * map_ptr) const {
+void tracer::f_pg_st(string ref_file, uint32_t id, boost::unordered_map<addr_5tup, addr_5tup> * map_ptr) const {
     cout << "Processing " << ref_file << endl;
     io::filtering_istream in;
     in.push(io::gzip_decompressor());
@@ -684,7 +678,7 @@ void tracer::f_pg_st(string ref_file, uint32_t id, boost::unordered_map<addr_5tu
             break;
         auto iter = map_ptr->find(packet);
         if (iter != map_ptr->end()) {
-            packet.copy_header(iter->second.second);
+            packet.copy_header(iter->second);
             out_loc << packet.str_easy_RW() << endl;
         }
     }

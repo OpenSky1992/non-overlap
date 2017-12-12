@@ -28,20 +28,18 @@ protected:
 
     container_T cache;	// record the updated time
     boost::unordered_map<record_T, double> cache_rec; // record the first time
-
-    uint32_t cache_miss;
+    
     uint32_t delay_rec[21];
-    uint32_t reuse_count;
-
     inline void insert(const record_T &, const double &);
 
 public:
+    uint32_t cache_miss;
+    uint32_t reuse_count;
+
     inline lru_cache();
     inline lru_cache(const uint32_t &TcamCap, double time, double = 0.006);
 
     inline bool ins_rec(const record_T &, double, bool = false);
-
-    inline void fetch_data();
 };
 
 class lru_cache_cab
@@ -57,20 +55,20 @@ protected:
     container_T cache;
     boost::unordered_map <uint32_t, uint32_t> flow_table;
     boost::unordered_map <const bucket*, double> buffer_check;
-
-    uint32_t rule_down_count;
-    uint32_t reuse_count;
     uint32_t delay_rec[21];
-    uint32_t cache_miss;
-
     inline void insert(const bucket*, const double &);
 
 public:
+    uint32_t cache_miss;
+    uint32_t rule_down_count;
+    uint32_t reuse_count;
+
     inline lru_cache_cab();
     inline lru_cache_cab(const uint32_t &, const double &, const double & = 0.006);
+    inline std::pair<size_t, size_t> getTcamUseInfo();
 
     inline bool ins_rec(const bucket *, const double &, bool = false);
-    inline void fetch_data();
+
 };
 
 
@@ -126,12 +124,6 @@ inline bool lru_cache<K>::ins_rec(const record_T & rec, double curT, bool newFlo
     }
 }
 
-template <typename K>
-inline void lru_cache<K>::fetch_data()
-{
-    std::cout<<"cache miss no: "<< cache_miss <<std::endl;
-    // std::cout<<"reuse rate: "<< reuse_count <<std::endl;
-}
 
 template <typename K>
 inline void lru_cache<K>::insert(const record_T & rec, const double & curT)
@@ -169,11 +161,9 @@ inline lru_cache_cab::lru_cache_cab(const uint32_t & cap, const double & time, c
 inline bool lru_cache_cab::ins_rec(const bucket * buck, const double & curT, bool newFlow)
 {
     const container_T::left_iterator iter = cache.left.find(buck);
-
     if (iter == cache.left.end())   // cache miss
     {
         insert(buck, curT);
-
         if (newFlow)
         {
             ++delay_rec[20];
@@ -199,14 +189,6 @@ inline bool lru_cache_cab::ins_rec(const bucket * buck, const double & curT, boo
         }
         return false;
     }
-}
-
-inline void lru_cache_cab::fetch_data()
-{
-    std::cout<<"cache miss no: "<< cache_miss <<std::endl;
-    std::cout<<"rule download no: "<< rule_down_count <<std::endl;
-    cout<<"cache bucket no: "<<cache.size()<<endl;
-    cout<<"cache rule no: "<<flow_table.size()<<endl;
 }
 
 inline void lru_cache_cab::insert(const bucket* pbuck, const double & time)
@@ -240,6 +222,10 @@ inline void lru_cache_cab::insert(const bucket* pbuck, const double & time)
     }
 }
 
+inline std::pair<size_t, size_t> lru_cache_cab::getTcamUseInfo()
+{
+    return std::make_pair(cache.size(),flow_table.size());
+}
 
 #endif
 

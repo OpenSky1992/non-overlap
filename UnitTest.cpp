@@ -4,6 +4,7 @@
 #include "parsePcap.h"
 #include "Separate.h"
 #include "OFswitch.h"
+#include "OFswitch_CB.h"
 
 
 using std::cout;
@@ -36,19 +37,17 @@ int main() {
     string metaDir="../metadata/";
     string rulefile = metaDir+"rule4000";
     rule_list rList(rulefile);
+    uint32_t bucketSize=1;
     
     // generate bucket tree
-    bucket_tree bTree(rList, 10);
-    bTree.tree_depth = 0;
-    bTree.cal_tree_depth(bTree.root);
-    cout <<"bucket Tree depth:"<< bTree.tree_depth << endl;
+    bucket_tree bTree(rList, bucketSize);
     bTree.print_tree(metaDir+"tree_pr.dat");
 
 
     //trace generation
     // tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
     // tGen.hotspot_prepare();
-    // tGen.pFlow_pruning_gen(false);
+    // tGen.pFlow_pruning_gen(true);
 
     //test bucket search
     // string str = "0.00%2952790016%2258155530%4000%8000%6";
@@ -60,9 +59,7 @@ int main() {
     // parsePcap parser("/home/part2/cab/data","/home/part2/cab/parsedTrace2");
     // parser.parse_pcap_file_mp(0,19);
 
-    //test separate rule
-    separate sep(rList);
-    // sep.printRule(metaDir+"non-overlap");
+
     
     //test correct 
     /*
@@ -92,15 +89,28 @@ int main() {
     */
 
     // simulation test
-    OFswitch ofswitch(400,400,"Trace_Generate_5/trace-1000k-0.05-20/ref_trace.gz");
-    ofswitch.set_para(&rList,&bTree,&sep);
+    string statistFile="../metadata/statistInfo";
+    ofstream out(statistFile);
+    out<<"bucket size :"<<bucketSize<<endl;
+    out.close();
+    //Trace_Generate_5/trace-1000k-0.05-200/ref_trace.gz
+    OFswitch_CB ofswitch("../metadata/rule4000_trace",statistFile);
+    ofswitch.TCAMcap=4000;
+    ofswitch.simuT=50;
+    ofswitch.rList=&rList;
+    ofswitch.bTree=&bTree;
+
+    separate sep(rList);
+    ofswitch.sep=&sep;
 
     ofswitch.mode=0;
     ofswitch.run_test();
-    // ofswitch.mode=1;
-    // ofswitch.run_test();
-    // ofswitch.mode=2;
-    // ofswitch.run_test();
+    ofswitch.mode=1;
+    ofswitch.run_test();
+    ofswitch.mode=2;
+    ofswitch.run_test();
+    ofswitch.mode=3;
+    ofswitch.run_test();
 
     return 0;
 }

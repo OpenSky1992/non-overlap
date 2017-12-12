@@ -14,7 +14,7 @@ add_definitions(-DBOOST_LOG_DYN_LINK)
 set(CAB Address.hpp Rule.hpp RuleList.cpp Bucket.cpp BucketTree.cpp)
 add_library(cab ${CAB})
 
-add_executable(UnitTest UnitTest.cpp TraceGen.cpp parsePcap.cpp Separate.cpp OFswitch.cpp)
+add_executable(UnitTest UnitTest.cpp TraceGen.cpp parsePcap.cpp Separate.cpp OFswitch.cpp OFswitch_CB.cpp)
 
 if(UNIX)
     target_link_libraries(

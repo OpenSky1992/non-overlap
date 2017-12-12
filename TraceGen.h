@@ -103,7 +103,7 @@ private:
 private:
     void flow_pruneGen_mp(unordered_set<addr_5tup> &) const;
     void flow_pruneGen_mp_ev(unordered_set<addr_5tup> &) const;
-    void f_pg_st (string, uint32_t, boost::unordered_map<addr_5tup, std::pair<uint32_t, addr_5tup> > *) const;
+    void f_pg_st (string, uint32_t, boost::unordered_map<addr_5tup, addr_5tup > *) const;
     void merge_files(string) const;
     void get_proc_files();
     boost::unordered_set<addr_5tup> flow_arr_mp() const;

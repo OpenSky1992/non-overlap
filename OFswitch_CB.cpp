@@ -1,4 +1,4 @@
-#include "OFswitch.h"
+#include "OFswitch_CB.h"
 
 namespace fs = boost::filesystem;
 namespace io = boost::iostreams;
@@ -11,7 +11,7 @@ using std::ofstream;
  * method brief:
  */
 
-OFswitch::OFswitch(string trace,string statistics) {
+OFswitch_CB::OFswitch_CB(string trace,string statistics) {
     rList = NULL;
     bTree = NULL;
     sep=NULL;
@@ -23,7 +23,7 @@ OFswitch::OFswitch(string trace,string statistics) {
     statFile = statistics;
 }
 
-void OFswitch::run_test() {
+void OFswitch_CB::run_test() {
     switch (mode) {
     case 0:
         flowInfomation();
@@ -42,7 +42,20 @@ void OFswitch::run_test() {
     }
 }
 
-void OFswitch::flowInfomation() {
+addr_5tup OFswitch_CB::formatConvert(string str)
+{
+    addr_5tup packet;
+    vector<string> temp;
+    boost::split(temp, str, boost::is_any_of("\t"));
+    packet.addrs[0]=boost::lexical_cast<uint32_t>(temp[0]);
+    packet.addrs[1]=boost::lexical_cast<uint32_t>(temp[1]);
+    packet.addrs[2]=0;
+    packet.addrs[3]=0;
+    packet.proto=true;
+    return packet;
+}
+
+void OFswitch_CB::flowInfomation() {
     fs::path ref_trace_path(traceFile);
     if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
         cout<<"Missing Ref file"<<endl;
@@ -55,21 +68,15 @@ void OFswitch::flowInfomation() {
     uint32_t packetCount=0;
 
     try {
-        io::filtering_istream trace_stream;
-        trace_stream.push(io::gzip_decompressor());
-        ifstream trace_file(traceFile);
-        trace_stream.push(trace_file);
-
+        ifstream trace_stream(traceFile);
         string str;
         while(getline(trace_stream, str)) {
-            addr_5tup packet(str);
-            curT = packet.timestamp;
+            addr_5tup packet=formatConvert(str);
             packetCount++;
+            curT=curT+0.0001;
             flow_rec.insert(packet);
-            if (curT > simuT)
-                break;
         }
-        io::close(trace_stream);
+        trace_stream.close();
     } catch (const io::gzip_error & e) {
         cout<<e.what()<<endl;
     }
@@ -81,7 +88,7 @@ void OFswitch::flowInfomation() {
     out.close();
 }
 
-void OFswitch::CEMtest_rt_TCAM() {
+void OFswitch_CB::CEMtest_rt_TCAM() {
     fs::path ref_trace_path(traceFile);
     if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
         cout<<"Missing Ref file"<<endl;
@@ -95,16 +102,12 @@ void OFswitch::CEMtest_rt_TCAM() {
     uint32_t packetCount=0;
 
     try {
-        io::filtering_istream trace_stream;
-        trace_stream.push(io::gzip_decompressor());
-        ifstream trace_file(traceFile);
-        trace_stream.push(trace_file);
-
+        ifstream trace_stream(traceFile);
         string str;
         while(getline(trace_stream, str)) {
-            addr_5tup packet(str);
-            curT = packet.timestamp;
+            addr_5tup packet=formatConvert(str);
             packetCount++;
+            curT=curT+0.0001;
             auto res = flow_rec.insert(packet);
             cam_cache.ins_rec(packet, curT, res.second);
             // if(packetCount%100==0){
@@ -114,21 +117,20 @@ void OFswitch::CEMtest_rt_TCAM() {
             //     }
             // }
 
-            if (curT > simuT)
-                break;
         }
-        io::close(trace_stream);
+        trace_stream.close();
     } catch (const io::gzip_error & e) {
         cout<<e.what()<<endl;
     }
 
     out<<endl<<"the CEM effect:"<<endl;
+    out<<"flow no: "<<flow_rec.size()<<endl;
     out<<"cache miss no: "<<cam_cache.cache_miss<<endl;
     out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
     out.close();
 }
 
-void OFswitch::CABtest_rt_TCAM() {
+void OFswitch_CB::CABtest_rt_TCAM() {
     fs::path ref_trace_path(traceFile);
     if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
         cout<<"Missing Ref file"<<endl;
@@ -142,16 +144,12 @@ void OFswitch::CABtest_rt_TCAM() {
     uint32_t packetCount=0;
 
     try {
-        io::filtering_istream trace_stream;
-        trace_stream.push(io::gzip_decompressor());
-        ifstream infile(traceFile);
-        trace_stream.push(infile);
-
+        ifstream trace_stream(traceFile);
         string str; 
         while(getline(trace_stream, str)) {
-            addr_5tup packet(str);
-            curT = packet.timestamp;
+            addr_5tup packet=formatConvert(str);
             packetCount++;
+            curT=curT+0.0001;
             auto res = flow_rec.insert(packet);
             bucket* buck = bTree->search_bucket(packet).first;
             if (buck!=NULL){
@@ -169,10 +167,8 @@ void OFswitch::CABtest_rt_TCAM() {
             //     }
             // }
 
-            if (curT > simuT)
-                break;
         }
-        io::close(trace_stream);
+        trace_stream.close();
     } catch (const io::gzip_error & e) {
         cout<<e.what()<<endl;
     }
@@ -186,7 +182,7 @@ void OFswitch::CABtest_rt_TCAM() {
     out.close();
 }
 
-void OFswitch::CNORtest_rt_TCAM() {
+void OFswitch_CB::CNORtest_rt_TCAM() {
     fs::path ref_trace_path(traceFile);
     if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
         cout<<"Missing Ref file"<<endl;
@@ -200,17 +196,12 @@ void OFswitch::CNORtest_rt_TCAM() {
     uint32_t packetCount=0;
 
     try {
-        io::filtering_istream trace_stream;
-        trace_stream.push(io::gzip_decompressor());
-        ifstream trace_file(traceFile,std::ios::app);
-        trace_stream.push(trace_file);
-
+        ifstream trace_stream(traceFile);
         string str;
         while(getline(trace_stream, str)) {
-            addr_5tup packet(str);
-            curT = packet.timestamp;
+            addr_5tup packet=formatConvert(str);
             packetCount++;
-            
+            curT=curT+0.0001;
             auto res = flow_rec.insert(packet);
             int ruleIndex=sep->searchIndepIndex(packet);
             if(ruleIndex>=0){
@@ -227,10 +218,8 @@ void OFswitch::CNORtest_rt_TCAM() {
                 // }
             }
 
-            if (curT > simuT)
-                break;
         }
-        io::close(trace_stream);
+        trace_stream.close();
     } catch (const io::gzip_error & e) {
         cout<<e.what()<<endl;
     }

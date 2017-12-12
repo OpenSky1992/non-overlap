@@ -1,7 +1,8 @@
-#ifndef OF_SWITCH_H
-#define OF_SWITCH_H
+#ifndef OF_SWITCH_CB_H
+#define OF_SWITCH_CB_H
 
 #include "stdafx.h"
+#include "Address.hpp"
 #include "Rule.hpp"
 #include "lru_cache.hpp"
 #include "RuleList.h"
@@ -16,7 +17,7 @@
 
 
 
-class OFswitch
+class OFswitch_CB
 {
 public:
     rule_list * rList;
@@ -32,11 +33,16 @@ public:
     std::string statFile;
 
 public:
-    OFswitch(string trace,string statistics);
+    OFswitch_CB(string trace,string statistics);
 
     void run_test();
 
 private:
+
+    //convert the classbench trace to addr_5tup
+    addr_5tup formatConvert(string str);
+
+
     void flowInfomation();
     void CABtest_rt_TCAM();
     void CEMtest_rt_TCAM();
