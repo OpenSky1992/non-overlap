@@ -170,16 +170,11 @@ tgen_para::tgen_para(string config_file):tgen_para() {
                 continue;
             }
 
-            if (tmp_arr[0] == "origin_trace_dir") {
-                pcap_dir = tmp_arr[1];
-                continue;
-            }
-
             if (tmp_arr[0] == "parsed_origin_trace_dir") {
                 parsed_pcap_dir = tmp_arr[1];
                 continue;
             }
-
+            
             if (tmp_arr[0] == "bulk_no") {
                 bulk_no = boost::lexical_cast<int>(tmp_arr[1]);
                 continue;
