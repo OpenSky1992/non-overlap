@@ -74,9 +74,9 @@ void OFswitch::flowInfomation() {
         cout<<e.what()<<endl;
     }
     cout<<"totoal packet no:"<<packetCount<<endl;
-    out<<"TCAM capacity:"<<TCAMcap<<endl;
-    out<<"simulation time:"<<simuT<<endl;
-    out<<"totoal packet no:"<<packetCount<<endl;
+    out<<"TCAM capacity: "<<TCAMcap<<endl;
+    out<<"simulation time: "<<simuT<<" second"<<endl;
+    out<<"totoal packet no: "<<packetCount<<endl;
     out<<"totoal flow no:"<<flow_rec.size()<<endl;
     out.close();
 }
@@ -124,7 +124,7 @@ void OFswitch::CEMtest_rt_TCAM() {
 
     out<<endl<<"the CEM effect:"<<endl;
     out<<"cache miss no: "<<cam_cache.cache_miss<<endl;
-    out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
+    // out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
     out.close();
 }
 
@@ -177,12 +177,13 @@ void OFswitch::CABtest_rt_TCAM() {
         cout<<e.what()<<endl;
     }
     out<<endl<<"the CAB effect:"<<endl;
+    out<<"bucket size: "<<bTree->threshold<<endl;
     out<<"cache miss no: "<<cam_cache.cache_miss<<endl;
     auto tcamUseInfo=cam_cache.getTcamUseInfo();
     out<<"current tcam bucket no: "<<tcamUseInfo.first<<endl;
     out<<"current tcam rule no: "<<tcamUseInfo.second<<endl;
     out<<"rule download count no: "<<cam_cache.rule_down_count<<endl;
-    out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
+    // out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
     out.close();
 }
 
@@ -220,12 +221,12 @@ void OFswitch::CNORtest_rt_TCAM() {
                 cout<<"null rules"<<endl;
             }
 
-            if(packetCount%10000==0){
-                cout<<packetCount<<" cache miss "<<cam_cache.cache_miss<<endl;
-                // if(cam_cache.cache_miss > TCAMcap ){
-                //     break;
-                // }
-            }
+            // if(packetCount%10000==0){
+            //     cout<<packetCount<<" cache miss "<<cam_cache.cache_miss<<endl;
+            //     // if(cam_cache.cache_miss > TCAMcap ){
+            //     //     break;
+            //     // }
+            // }
 
             if (curT > simuT)
                 break;
@@ -237,7 +238,7 @@ void OFswitch::CNORtest_rt_TCAM() {
 
     out<<endl<<"the CNOR effect:"<<endl;
     out<<"cache miss no: "<<cam_cache.cache_miss<<endl;
-    out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
+    // out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
     out.close();
 }
 

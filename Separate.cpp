@@ -17,13 +17,20 @@ separate::separate(rule_list &rList)
 		originIndex++;
 	}
 	cout<<"the number of useless rule:"<<uselessRule_count<<endl;
-	cout<<"the number of independent rule:"<<independentRuleSet.size()<<endl;
+	cout<<"the number of independent rule:"<<independentRuleSet.list.size()<<endl;
+	indepTree=new bucket_tree(independentRuleSet,50);
+	cout<<"the indep tree depth: "<<indepTree->getTreeDepth()<<endl;
+}
+
+separate::~separate()
+{
+	delete indepTree;
 }
 
 void separate::printRule(string filename)
 {
 	ofstream out(filename);
-	for(p_rule indep:independentRuleSet)
+	for(p_rule indep:independentRuleSet.list)
 		out<<indep.get_str()<<endl;
 	out.close();
 }
@@ -45,7 +52,7 @@ vector<int> separate::getOverlapFromSubset(const p_rule &rule1,const vector<int>
 {
 	vector<int> result;
 	for(int index:ruleSet){
-		if(rule1.match_rule(independentRuleSet[index]))
+		if(rule1.match_rule(independentRuleSet.list[index]))
 			result.push_back(index);
 	}
 	return result;
@@ -55,7 +62,7 @@ vector<int> separate::getOverlapFromSubset(const p_rule &rule1,const vector<int>
 void separate::separateRule(const p_rule rule1,const uint32_t originIndex,vector<int> &overlap)
 {
 	if(overlap.empty()){
-		independentRuleSet.push_back(rule1);
+		independentRuleSet.list.push_back(rule1);
 		indepIndex2realIndex.push_back(originIndex);
 		return ;
 	}
@@ -64,7 +71,7 @@ void separate::separateRule(const p_rule rule1,const uint32_t originIndex,vector
 	it=overlap.erase(it);
 
 	p_rule new_rule=rule1;
-	p_rule target=independentRuleSet[maxItValue];
+	p_rule target=independentRuleSet.list[maxItValue];
 	for(unsigned int i=0;i<number_prefix;i++){
 		int rule1_mask,target_mask,diff_mask;
 		uint32_t compare_bit;
@@ -88,26 +95,19 @@ void separate::separateRule(const p_rule rule1,const uint32_t originIndex,vector
 
 int separate::AddNewRule(const p_rule &rule1,const uint32_t originIndex)
 {
-	int beforeSize=independentRuleSet.size();
+	int beforeSize=independentRuleSet.list.size();
 	vector<int> overlap;
-	for(unsigned int i=0;i<independentRuleSet.size();i++){
-		if(rule1.match_rule(independentRuleSet[i]))
+	for(unsigned int i=0;i<independentRuleSet.list.size();i++){
+		if(rule1.match_rule(independentRuleSet.list[i]))
 			overlap.push_back(i);
 	}
 	separateRule(rule1,originIndex,overlap);
-	return independentRuleSet.size()-beforeSize;
+	return independentRuleSet.list.size()-beforeSize;
 }
 
 int separate::searchIndepIndex(const addr_5tup &packet) const
 {
-	int result=-1;
-	for(int i=0;i<int(independentRuleSet.size());i++){
-		if(independentRuleSet[i].packet_hit(packet)){
-			result=i;
-			break;
-		}
-	}
-	return result;
+	return indepTree->search_bucket(packet).second; 
 }
 
 int separate::searchOriginIndex(const addr_5tup &packet) const

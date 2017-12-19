@@ -15,6 +15,7 @@ using std::ofstream;
 bucket_tree::bucket_tree() {
     root = NULL;
     threshold=0;
+    tree_depth=0;
 }
 
 //constructor
@@ -111,6 +112,13 @@ void bucket_tree::delNode(bucket * ptr) {
         delNode(*iter);
     }
     delete ptr;
+}
+
+int bucket_tree::getTreeDepth()
+{
+    tree_depth=0;
+    cal_tree_depth(root);
+    return tree_depth;
 }
 
 void bucket_tree::cal_tree_depth(bucket * ptr, int count) {

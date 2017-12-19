@@ -34,7 +34,9 @@ class bucket_tree {
 
     //return bucket and the index of rule
     std::pair<bucket *, int> search_bucket(const addr_5tup &) const;
-    void cal_tree_depth(bucket *, int = 0);
+    //get the tree depth
+    int getTreeDepth();
+    
 
   private:
     // static related
@@ -43,6 +45,7 @@ class bucket_tree {
     void delNode(bucket *);
     void print_bucket(std::ofstream &, bucket *, bool); // const
     std::pair<bucket *, int> search_bucket_R(const addr_5tup &, bucket* ) const;
+    void cal_tree_depth(bucket *, int = 0);
 
   public:
 

@@ -1,0 +1,11 @@
+data source:
+IMC1	univ1_*  last time: 3840s
+IMC2	univ2_*	 last time: 9481s
+caida	equinix-chicago		last time 60s
+
+parsed pcap file:
+./parse.sh xxx
+xxx have two subdirectory
+├── parsedTrace
+└── pcap
+

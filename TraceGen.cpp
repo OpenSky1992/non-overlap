@@ -380,7 +380,7 @@ void tracer::pFlow_pruning_gen(bool evolving) {
     if (fs::create_directory(dir)) {
         cout<<"creating: " << dir.string()<<endl;
     } else {
-        cout<<"exitst: "<<dir.string()<<endl;
+        cout<<"exist: "<<dir.string()<<endl;
     }
 
     /* get the arrival time of each flow. */
@@ -453,9 +453,9 @@ void tracer::flow_pruneGen_mp( unordered_set<addr_5tup> & flowInfo) const {
 
     /* pruned_map   old_header-> (header_id, new_header) */
 
-    const double smoothing_interval = 10.0;
+    const double smoothing_interval = 0.2;
     double next_checkpoint = smoothing_interval;
-    double flow_thres = 10 * para.flow_rate;
+    double flow_thres = smoothing_interval * para.flow_rate * 1000;
 
     vector< addr_5tup > header_buf;
     header_buf.reserve(3000);
@@ -579,7 +579,7 @@ void tracer::flow_pruneGen_mp_ev( unordered_set<addr_5tup> & flowInfo) const {
     boost::unordered_map<addr_5tup, addr_5tup > pruned_map;
     const double smoothing_interval = 10.0;
     double next_checkpoint = smoothing_interval;
-    double flow_thres = 10 * para.flow_rate;
+    double flow_thres = 10 * para.flow_rate * 1000;
     vector< addr_5tup > header_buf;
     header_buf.reserve(3000);
     uint32_t total_header = 0;
