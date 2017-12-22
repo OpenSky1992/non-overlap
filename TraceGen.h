@@ -51,6 +51,8 @@ public:
     string trace_root_dir;      // root directory of generated traces	
     string hotcandi_str;	    // hotspot candi file
     string hotspot_ref;         // hotspot reference file
+    string hotcandi_str_IRS;        // hotspot candi file
+    string hotspot_ref_IRS;         // hotspot reference file
     string flowInfoFile_str;    // first arr time of each flow
     
     // dynamics parameter
@@ -87,7 +89,11 @@ public:
     tracer(rule_list * rList, string para_file);
     //generate the hotspot buckets by bucketTree
     void hotspot_prepare();
-    void pFlow_pruning_gen(bool);
+    void hotspot_prepare_IRS();
+
+    //method:false, indicate generate trace by bucket
+    //method:true, indicate generate trace by non-overlap rule set
+    void pFlow_pruning_gen(bool method);
 
 private:
     rule_list * rList;
@@ -102,7 +108,7 @@ private:
     
 private:
     void flow_pruneGen_mp(unordered_set<addr_5tup> &) const;
-    void flow_pruneGen_mp_ev(unordered_set<addr_5tup> &) const;
+    void flow_pruneGen_IRS( unordered_set<addr_5tup> & flowInfo) const;
     void f_pg_st (string, uint32_t, boost::unordered_map<addr_5tup, addr_5tup > *) const;
     void merge_files(string) const;
     void get_proc_files();

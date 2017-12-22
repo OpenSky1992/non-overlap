@@ -19,7 +19,7 @@ separate::separate(rule_list &rList)
 	cout<<"the number of useless rule:"<<uselessRule_count<<endl;
 	cout<<"the number of independent rule:"<<independentRuleSet.list.size()<<endl;
 	indepTree=new bucket_tree(independentRuleSet,50);
-	cout<<"the indep tree depth: "<<indepTree->getTreeDepth()<<endl;
+	//cout<<"the indep tree depth: "<<indepTree->getTreeDepth()<<endl;
 }
 
 separate::~separate()

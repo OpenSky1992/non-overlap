@@ -2,3 +2,4 @@ build/
 flowCache/
 metadata/
 traceGen/
+ruleGen/

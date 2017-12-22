@@ -51,8 +51,6 @@ inline p_rule::p_rule(const std::string &rule_str)
 {
     vector<string> temp;
     boost::split(temp, rule_str, boost::is_any_of("\t"));
-    //take off the first char '@'
-    temp[0].erase(0,1);
     for(uint32_t i=0; i<number_prefix; i++) {
         addrs[i] = pref_addr(temp[i]);
     }

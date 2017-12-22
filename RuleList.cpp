@@ -16,6 +16,8 @@ rule_list::rule_list(string & filename) {
     string sLine = "";
     getline(file, sLine);
     while (!file.eof()) {
+        //take off the first char '@'
+        sLine.erase(0,1);
         p_rule sRule(sLine);
         list.push_back(sRule);
         getline(file, sLine);
