@@ -16,31 +16,12 @@ OFswitch::OFswitch(string trace,string statistics) {
     bTree = NULL;
     sep=NULL;
 
-    mode = 0;
     simuT = 100;
     TCAMcap = 4000;
     traceFile = trace;
     statFile = statistics;
 }
 
-void OFswitch::run_test() {
-    switch (mode) {
-    case 0:
-        flowInfomation();
-        break;
-    case 1:
-        CEMtest_rt_TCAM();
-        break;
-    case 2:
-        CABtest_rt_TCAM();
-        break;
-    case 3:
-        CNORtest_rt_TCAM();
-        break;
-    default:
-        return;
-    }
-}
 
 void OFswitch::flowInfomation() {
     fs::path ref_trace_path(traceFile);
@@ -140,6 +121,7 @@ void OFswitch::CABtest_rt_TCAM() {
     boost::unordered_set<addr_5tup> flow_rec;
     ofstream out(statFile,std::ios::app);
     uint32_t packetCount=0;
+    // uint32_t NullRuleCount=0;
 
     try {
         io::filtering_istream trace_stream;
@@ -154,12 +136,16 @@ void OFswitch::CABtest_rt_TCAM() {
             packetCount++;
             auto res = flow_rec.insert(packet);
             bucket* buck = bTree->search_bucket(packet).first;
-            if (buck!=NULL){
-                cam_cache.ins_rec(buck, curT, res.second);
-            } 
-            else{
-                cout<<"null bucket" <<endl;
-            }
+
+            // if (buck!=NULL){
+            cam_cache.ins_rec(buck, curT, res.second);
+                // if(bTree->search_bucket(packet).second==-1){
+                //     NullRuleCount++;
+                // }
+            // } 
+            // else{
+            //     cout<<"null bucket" <<endl;
+            // }
             // if(packetCount % 1000==0){
             //     auto tcamUseInfo=cam_cache.getTcamUseInfo();
             //     uint32_t tcamUseCount=tcamUseInfo.first+tcamUseInfo.second ;
@@ -199,6 +185,7 @@ void OFswitch::CNORtest_rt_TCAM() {
     boost::unordered_set<addr_5tup> flow_rec;
     ofstream out(statFile,std::ios::app);
     uint32_t packetCount=0;
+    uint32_t NullRuleCount=0;
 
     try {
         io::filtering_istream trace_stream;
@@ -217,8 +204,9 @@ void OFswitch::CNORtest_rt_TCAM() {
             if(ruleIndex>=0){
                 cam_cache.ins_rec(ruleIndex, curT, res.second);
             }
-            else{
-                cout<<"null rules"<<endl;
+            else{ //drop packet when no rule matching
+                //cout<<"null rules"<<endl;
+                NullRuleCount++;
             }
 
             // if(packetCount%10000==0){
@@ -238,6 +226,7 @@ void OFswitch::CNORtest_rt_TCAM() {
 
     out<<endl<<"the CNOR effect:"<<endl;
     out<<"cache miss no: "<<cam_cache.cache_miss<<endl;
+    //cout<<"the packet that no rule match it: "<<NullRuleCount<<endl;
     // out<<"reuse entry no: "<<cam_cache.reuse_count<<endl;
     out.close();
 }

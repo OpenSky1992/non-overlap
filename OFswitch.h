@@ -24,8 +24,7 @@ public:
     separate * sep;
 
 public:
-    uint32_t mode; // mode 0: flow information collection: 
-                   // mode 1: CEM, mode 2: CAB, mode 3: CNOR
+
     double simuT;
     uint32_t TCAMcap;
     std::string traceFile;
@@ -34,12 +33,10 @@ public:
 public:
     OFswitch(string trace,string statistics);
 
-    void run_test();
 
-private:
     void flowInfomation();
-    void CABtest_rt_TCAM();
     void CEMtest_rt_TCAM();
+    void CABtest_rt_TCAM();
     void CNORtest_rt_TCAM();  //caching non-overlap rule
 };
 

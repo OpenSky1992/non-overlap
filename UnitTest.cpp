@@ -10,6 +10,7 @@ using std::cout;
 using std::endl;
 using std::ofstream;
 using std::ifstream;
+using std::stringstream;
 
 namespace logging = boost::log;
 namespace src = boost::log::sources;
@@ -17,6 +18,9 @@ namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 namespace fs = boost::filesystem;
 
+string rulefile ="../metadata/ruleset/rule4000";
+string tracefile="../traceGen/bucket-30k-0.04-20/ref_trace.gz";
+//Trace_Generate_5/trace-1000k-0.05-200/ref_trace.gz
 
 void logging_init() {
     fs::create_directory("./log");
@@ -31,10 +35,9 @@ void logging_init() {
 
 void testDiffBucketSize()
 {
-    string metaDir="../metadata/";
-    string rulefile = metaDir+"rule4000";
     rule_list rList(rulefile);
-    uint32_t bucketSize=20;
+    const uint32_t bucketNum=6;
+    uint32_t bucketSizeArr[]={1,5,10,15,20,25};
     
     // generate bucket tree
     bucket_tree *bTree;    
@@ -43,38 +46,39 @@ void testDiffBucketSize()
     string statistFile="../metadata/statistInfo";
     ofstream out(statistFile);
     out.close();
-    //Trace_Generate_5/trace-1000k-0.05-200/ref_trace.gz
-    OFswitch ofswitch("../traceGen/bucket-30k-0.05-200/ref_trace.gz",statistFile);
-    ofswitch.TCAMcap=2000;
-    ofswitch.simuT=1;
-    ofswitch.rList=&rList;
-
     separate sep(rList);
+    OFswitch ofswitch(tracefile,statistFile);
+    ofswitch.TCAMcap=400;
+    ofswitch.simuT=60;
     ofswitch.sep=&sep;
+    ofswitch.rList=&rList;
+    ofswitch.flowInfomation();
+    
+    
+        
+    
+    for(uint32_t i=0;i<=16;i++){
+        stringstream ss;
+        ofswitch.TCAMcap=400+i*100;
+        cout<<"TCAM:"<<ofswitch.TCAMcap<<endl;
+        ss<<statistFile<<"_"<<ofswitch.TCAMcap;
+        ofswitch.statFile=ss.str();
+        ofswitch.CEMtest_rt_TCAM();
 
-    ofswitch.mode=0;
-    ofswitch.run_test();
-    ofswitch.mode=1;
-    ofswitch.run_test();
-
-    ofswitch.mode=2;
-    for(uint32_t i=1;i<=bucketSize;i++){
-        cout<<i<<endl;
-        bTree=new bucket_tree(rList, i);
-        ofswitch.bTree=bTree;
-        ofswitch.run_test();
-        delete bTree;
-        bTree=NULL;
+        for(uint32_t i=0;i<bucketNum;i++){
+            cout<<"bucket size: "<<bucketSizeArr[i]<<endl;
+            bTree=new bucket_tree(rList, bucketSizeArr[i]);
+            ofswitch.bTree=bTree;
+            ofswitch.CABtest_rt_TCAM();
+            delete bTree;
+            bTree=NULL;
+        }
+        ofswitch.CNORtest_rt_TCAM();
     }
-
-    ofswitch.mode=3;
-    ofswitch.run_test();
 }
 
 void testDiffNorm()
-{
-    // string metaDir="../metadata/";
-    string rulefile ="../metadata/rule4000";
+{    
     rule_list rList(rulefile);
     uint32_t bucketSize=10;
     // generate bucket tree
@@ -83,72 +87,62 @@ void testDiffNorm()
     string statistFile="../metadata/statistInfo";
     ofstream out(statistFile);
     out.close();
-    //Trace_Generate_5/trace-1000k-0.05-200/ref_trace.gz
-    OFswitch ofswitch("../traceGen/bucket-30k-0.04-2000/ref_trace.gz",statistFile);
-    ofswitch.TCAMcap=2000;
+    
+    OFswitch ofswitch(tracefile,statistFile);
+    ofswitch.TCAMcap=1000;
     ofswitch.simuT=1;
     ofswitch.rList=&rList;
     ofswitch.bTree=bTree;
-
     separate sep(rList);
     ofswitch.sep=&sep;
 
-    ofswitch.mode=0;
     cout<<"info collect:"<<endl;
-    ofswitch.run_test();
-    ofswitch.mode=1;
+    ofswitch.flowInfomation();
     cout<<"CEM:"<<endl;
-    ofswitch.run_test();
-    ofswitch.mode=2;
+    ofswitch.CEMtest_rt_TCAM();
     cout<<"CAB:"<<endl;
-    ofswitch.run_test();
-    ofswitch.mode=3;
+    ofswitch.CABtest_rt_TCAM();
     cout<<"non-overlap:"<<endl;
-    ofswitch.run_test();
+    ofswitch.CNORtest_rt_TCAM();
     delete bTree;
 }
 
 
-void traceGenByBucket()
+void traceGen()
 {
-    string metaDir="../metadata/";
-    string rulefile = metaDir+"rule4000";
     rule_list rList(rulefile);
     uint32_t bucketSize=10;
     bucket_tree *bTree=new bucket_tree(rList,bucketSize); 
 
-    bTree->print_tree(metaDir+"tree_pr.dat");
+    bTree->print_tree("../metadata/tree_pr.dat");
     tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
     tGen.hotspot_prepare();
     tGen.pFlow_pruning_gen(false);
     delete bTree;
 }
 
-void traceGenIRS()
-{
-    string metaDir="../metadata/";
-    string rulefile = metaDir+"rule4000";
-    rule_list rList(rulefile);
-    separate sep(rList);
-
-    sep.printRule(metaDir+"non-overlap.dat");
-    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
-    tGen.hotspot_prepare_IRS();
-    tGen.pFlow_pruning_gen(true);
-}
-
-
-
 int main() {
     srand(time(NULL));
     logging_init();
 
-    // traceGenByBucket();
-    //testDiffBucketSize();
-    testDiffNorm();
+    // traceGen();
+    testDiffBucketSize();
+    // testDiffNorm();
     return 0;
 }
 
+/*
+void traceGenIRS()
+{
+    rule_list rList(rulefile);
+    separate sep(rList);
+
+    sep.printRule("../metadata/non-overlap.dat");
+    tracer tGen(&rList,"../metadata/TracePrepare_config.ini");
+    tGen.hotspot_prepare_IRS();
+    tGen.pFlow_pruning_gen(true);
+}
+*/
     //generate rule set
     //string tracefile="/home/opensky/cab/data/caida/parsedTrace/equinix-chicago.dirA.20160317-130000.UTC.anon.pcap.gz";
     //ruleGen(tracefile,"../ruleGen/rule",4000);

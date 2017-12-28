@@ -358,6 +358,10 @@ void tracer::hotspot_prepare() {
         iter++;
         ++hs_count;
     }
+    if(hs_count<para.hot_candi_no){
+        para.hot_candi_no=hs_count;
+        para.hotspot_no=para.hot_candi_no / 2;
+    }
 
     ff.close();
 }
