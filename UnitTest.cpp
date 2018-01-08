@@ -4,6 +4,8 @@
 #include "OFswitch.h"
 #include "OFswitch_CB.h"
 #include "TraceGen.h"
+#include <boost/unordered_map.hpp>
+#include <set>
 
 
 using std::cout;
@@ -16,7 +18,9 @@ namespace logging = boost::log;
 namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
+
 namespace fs = boost::filesystem;
+namespace io = boost::iostreams;
 
 string rulefile ="../metadata/ruleset/rule4000";
 string tracefile="../traceGen/bucket-30k-0.04-20/ref_trace.gz";
@@ -33,6 +37,88 @@ void logging_init() {
     );
 }
 
+void flowInfomation(double simuT) {
+    fs::path ref_trace_path(tracefile);
+    if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
+        cout<<"Missing Ref file"<<endl;
+        return;
+    }
+
+    double curT = 0;
+    boost::unordered_set<addr_5tup> flow_rec;
+    uint32_t packetCount=0;
+
+    try {
+        io::filtering_istream trace_stream;
+        trace_stream.push(io::gzip_decompressor());
+        ifstream ifs(tracefile);
+        trace_stream.push(ifs);
+
+        string str;
+        while(getline(trace_stream, str)) {
+            addr_5tup packet(str);
+            curT = packet.timestamp;
+            packetCount++;
+            flow_rec.insert(packet);
+            if (curT > simuT)
+                break;
+        }
+        io::close(trace_stream);
+    } catch (const io::gzip_error & e) {
+        cout<<e.what()<<endl;
+    }
+    cout<<"totoal packet no:"<<packetCount<<endl;
+    cout<<"totoal flow no:"<<flow_rec.size()<<endl;
+}
+
+void flowStatistics(double simuT,string output) {
+    fs::path ref_trace_path(tracefile);
+    if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
+        cout<<"Missing Ref file"<<endl;
+        return;
+    }
+
+    double curT = 0;
+    boost::unordered_map<addr_5tup,uint32_t> flow_rec;
+    std::set<uint32_t> header_rec;
+    uint32_t packetCount=0;
+
+    try {
+        io::filtering_istream trace_stream;
+        trace_stream.push(io::gzip_decompressor());
+        ifstream ifs(tracefile);
+        trace_stream.push(ifs);
+
+        string str;
+        while(getline(trace_stream, str)) {
+            addr_5tup packet(str);
+            curT = packet.timestamp;
+            packetCount++;
+            auto ins_res=flow_rec.insert(std::make_pair(packet,1));
+            header_rec.insert(packet.addrs[0]);
+            header_rec.insert(packet.addrs[1]);
+            if(!ins_res.second){
+                ++ins_res.first->second;
+            }
+            if (curT > simuT)
+                break;
+        }
+        io::close(trace_stream);
+    } catch (const io::gzip_error & e) {
+        cout<<e.what()<<endl;
+    }
+    ofstream ff(output);
+    for(auto it=flow_rec.begin();it!=flow_rec.end();it++){
+        uint32_t src=distance(header_rec.begin(),header_rec.find(it->first.addrs[0]));
+        uint32_t dst=distance(header_rec.begin(),header_rec.find(it->first.addrs[1]));
+        ff<<src<<"\t"<<dst<<"\t"<<it->second<<endl;
+    }
+    ff.close();
+    cout<<"totoal host no:"<<header_rec.size()<<endl;
+    cout<<"totoal packet no:"<<packetCount<<endl;
+    cout<<"totoal flow no:"<<flow_rec.size()<<endl;
+}
+
 void testDiffBucketSize()
 {
     rule_list rList(rulefile);
@@ -47,15 +133,14 @@ void testDiffBucketSize()
     ofstream out(statistFile);
     out.close();
     separate sep(rList);
+    
     OFswitch ofswitch(tracefile,statistFile);
     ofswitch.TCAMcap=400;
     ofswitch.simuT=60;
     ofswitch.sep=&sep;
     ofswitch.rList=&rList;
-    ofswitch.flowInfomation();
+    flowInfomation(ofswitch.simuT);
     
-    
-        
     
     for(uint32_t i=0;i<=16;i++){
         stringstream ss;
@@ -95,9 +180,9 @@ void testDiffNorm()
     ofswitch.bTree=bTree;
     separate sep(rList);
     ofswitch.sep=&sep;
+    cout<<"flow info:"<<endl;
+    flowInfomation(ofswitch.simuT);
 
-    cout<<"info collect:"<<endl;
-    ofswitch.flowInfomation();
     cout<<"CEM:"<<endl;
     ofswitch.CEMtest_rt_TCAM();
     cout<<"CAB:"<<endl;
@@ -121,12 +206,15 @@ void traceGen()
     delete bTree;
 }
 
+
 int main() {
     srand(time(NULL));
     logging_init();
 
+    // flowInfomation(60);
+    flowStatistics(60,"../metadata/flowStat");
     // traceGen();
-    testDiffBucketSize();
+    // testDiffBucketSize();
     // testDiffNorm();
     return 0;
 }

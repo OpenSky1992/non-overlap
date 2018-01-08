@@ -22,46 +22,6 @@ OFswitch::OFswitch(string trace,string statistics) {
     statFile = statistics;
 }
 
-
-void OFswitch::flowInfomation() {
-    fs::path ref_trace_path(traceFile);
-    if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {
-        cout<<"Missing Ref file"<<endl;
-        return;
-    }
-
-    double curT = 0;
-    boost::unordered_set<addr_5tup> flow_rec;
-    ofstream out(statFile,std::ios::app);
-    uint32_t packetCount=0;
-
-    try {
-        io::filtering_istream trace_stream;
-        trace_stream.push(io::gzip_decompressor());
-        ifstream trace_file(traceFile);
-        trace_stream.push(trace_file);
-
-        string str;
-        while(getline(trace_stream, str)) {
-            addr_5tup packet(str);
-            curT = packet.timestamp;
-            packetCount++;
-            flow_rec.insert(packet);
-            if (curT > simuT)
-                break;
-        }
-        io::close(trace_stream);
-    } catch (const io::gzip_error & e) {
-        cout<<e.what()<<endl;
-    }
-    cout<<"totoal packet no:"<<packetCount<<endl;
-    out<<"TCAM capacity: "<<TCAMcap<<endl;
-    out<<"simulation time: "<<simuT<<" second"<<endl;
-    out<<"totoal packet no: "<<packetCount<<endl;
-    out<<"totoal flow no:"<<flow_rec.size()<<endl;
-    out.close();
-}
-
 void OFswitch::CEMtest_rt_TCAM() {
     fs::path ref_trace_path(traceFile);
     if (!(fs::exists(ref_trace_path) && fs::is_regular_file(ref_trace_path))) {

@@ -33,8 +33,6 @@ public:
 public:
     OFswitch(string trace,string statistics);
 
-
-    void flowInfomation();
     void CEMtest_rt_TCAM();
     void CABtest_rt_TCAM();
     void CNORtest_rt_TCAM();  //caching non-overlap rule
