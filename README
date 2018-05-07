@@ -9,3 +9,8 @@ xxx have two subdirectory
 ├── parsedTrace
 └── pcap
 
+
+build:
+	cd build
+	cmake ..
+	make

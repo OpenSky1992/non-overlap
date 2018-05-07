@@ -6,12 +6,14 @@
 #include "RuleList.h"
 #include "BucketTree.h"
 #include <unordered_map>
+#include <list>
+
 
 
 class separate
 {
 public:
-	separate(rule_list &rList);
+	separate(rule_list *sourceList);
 	void printRule(string filename);
 	~separate();
 
@@ -22,11 +24,8 @@ public:
 	int searchIndepIndex(const addr_5tup &) const;
 
 private:
-	int AddNewRule(const p_rule &rule1,const uint32_t index);
-	vector<int> getOverlapFromSubset(const p_rule &rule1,const vector<int> &ruleSet);
-	
-	//the main separate function
-	void separateRule(const p_rule rule1,const uint32_t index,vector<int> &ovelap);
+	int AddNewRule(const uint32_t index);
+
 	
 	//initial the mapping
 	void mappingPrepare();
@@ -38,8 +37,12 @@ private:
 	//record the mapping of the index of independent set and orgin rule set.
 	std::vector<uint32_t> indepIndex2realIndex;
 
+	//record the remain wildcard, reset when add new rule
+	std::list<p_rule> remainWildcard;
+
 	//rule_tree indepTree;
 	bucket_tree *indepTree;
+	rule_list * rList;
 };
 
 #endif

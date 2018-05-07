@@ -4,12 +4,13 @@
 #include "stdafx.h"
 #include "Address.hpp"
 #include "Rule.hpp"
-#include <unordered_map>
-#include <set>
+// #include <unordered_map>
+// #include <set>
 
 class rule_list {
 public:
     std::vector<p_rule> list;
+    std::vector<std::vector<uint32_t> > dep_map;
 
     rule_list();
     rule_list(std::string & filename);
@@ -17,5 +18,8 @@ public:
 
     //print to file
     void print(const std::string &);
+
+    // for dependency set
+    void obtain_dep();
 };
 #endif

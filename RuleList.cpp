@@ -32,6 +32,7 @@ rule_list::rule_list(string & filename) {
     }
     file.close();
     cout<<"unique rule number:"<<list.size()<<endl;
+    obtain_dep();
 }
 
 
@@ -51,4 +52,33 @@ void rule_list::print(const string & filename) {
         file<<iter->get_str()<<endl;
     }
     file.close();
+}
+
+
+void rule_list::obtain_dep() { // obtain the dependency map
+    // unsigned int countDep[20000]={0},maxDep=0;
+    for(uint32_t idx = 0; idx < list.size(); ++idx) {
+        vector <uint32_t> dep_rules;
+        for (uint32_t idx1 = 0; idx1 < idx; ++idx1) {
+            if (list[idx].match_rule(list[idx1])) {
+                dep_rules.push_back(idx1);
+            }
+        }
+        dep_map.push_back(dep_rules);
+
+        /*
+        if(dep_rules.size()>maxDep)
+        {
+            maxDep=dep_rules.size();
+        }
+        countDep[dep_rules.size()]++;
+        */
+    }
+    
+    /*
+    for(unsigned int i=0;i<=maxDep;i++)
+        if(countDep[i]>0)
+            cout<<"depend "<<i<<" : "<<countDep[i]<<endl;
+    cout<<endl<<"max dep value: "<<maxDep<<endl;
+    */
 }

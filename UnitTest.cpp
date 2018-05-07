@@ -22,7 +22,7 @@ namespace keywords = boost::log::keywords;
 namespace fs = boost::filesystem;
 namespace io = boost::iostreams;
 
-string rulefile ="../metadata/ruleset/rule4000";
+string rulefile ="../metadata/ruleset/8k_4";
 string tracefile="../traceGen/bucket-30k-0.04-20/ref_trace.gz";
 //Trace_Generate_5/trace-1000k-0.05-200/ref_trace.gz
 
@@ -132,7 +132,7 @@ void testDiffBucketSize()
     string statistFile="../metadata/statistInfo";
     ofstream out(statistFile);
     out.close();
-    separate sep(rList);
+    separate sep(&rList);
     
     OFswitch ofswitch(tracefile,statistFile);
     ofswitch.TCAMcap=400;
@@ -178,7 +178,7 @@ void testDiffNorm()
     ofswitch.simuT=1;
     ofswitch.rList=&rList;
     ofswitch.bTree=bTree;
-    separate sep(rList);
+    separate sep(&rList);
     ofswitch.sep=&sep;
     cout<<"flow info:"<<endl;
     flowInfomation(ofswitch.simuT);
@@ -190,8 +190,18 @@ void testDiffNorm()
     cout<<"non-overlap:"<<endl;
     ofswitch.CNORtest_rt_TCAM();
     delete bTree;
+
+    ofswitch.rList=NULL;
+    ofswitch.bTree=NULL;
+    ofswitch.sep=NULL;
 }
 
+
+void testSeparate()
+{    
+    rule_list rList(rulefile);
+    separate sep(&rList);
+}
 
 void traceGen()
 {
@@ -212,10 +222,11 @@ int main() {
     logging_init();
 
     // flowInfomation(60);
-    flowStatistics(60,"../metadata/flowStat");
+    //flowStatistics(60,"../metadata/flowStat");
     // traceGen();
     // testDiffBucketSize();
     // testDiffNorm();
+    testSeparate();
     return 0;
 }
 
